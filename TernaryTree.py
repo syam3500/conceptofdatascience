@@ -1,11 +1,12 @@
 class TTreeNode:
+    """Ternary Tree Node class"""
+
+
     def __init__(self, string):
         self._string = string
-        self._lt, self._gt, self._mt = None, None, None
+        self._lt, self._gt, self._bt = None, None, None
 
     def _insert(self, string):
-        if string == self._string:
-            return
         if string < self._string:
             if self._lt is None:
                 self._lt = TTreeNode(string)
@@ -16,20 +17,39 @@ class TTreeNode:
                 self._gt = TTreeNode(string)
             else:
                 self._gt._insert(string)
+        elif string == self._string:
+            if self._bt is None:
+                self._bt = TTreeNode(string)
+            else:
+                self._bt._insert(string)
 
     def _search(self, string):
         if string == self._string:
-            return True
+            return self._bt is not None and self._bt._search(string)
         elif string < self._string:
             return self._lt is not None and self._lt._search(string)
         else:
             return self._gt is not None and self._gt._search(string)
+
+    def _prefix_search(self, prefix):
+        results = []
+        if self._string.startswith(prefix):
+            results.append(self._string)
+        if self._lt is not None:
+            results.extend(self._lt._prefix_search(prefix))
+        if self._bt is not None:
+            results.extend(self._bt._prefix_search(prefix)) 
+        if self._gt is not None:
+            results.extend(self._gt._prefix_search(prefix))
+        return results
 
     def _all_strings(self):
         strings = [self._string]
         if self._lt is not None:
             strings.extend(self._lt._all_strings())
         if self._gt is not None:
+            strings.extend(self._gt._all_strings())
+        if self._bt is not None:
             strings.extend(self._gt._all_strings())
         return strings
 
@@ -39,6 +59,8 @@ class TTreeNode:
             length += len(self._lt)
         if self._gt is not None:
             length += len(self._gt)
+        if self._bt is not None:
+            length += len(self._bt)
         return length
 
     def _to_string(self, indent=''):
@@ -47,15 +69,23 @@ class TTreeNode:
             repr_str += '\n' + self._lt._to_string(indent + '  ')
         if self._gt is not None:
             repr_str += '\n' + self._gt._to_string(indent + '  ')
+        if self._bt is not None:
+            repr_str += '\n' + self._bt._to_string(indent + '  ')
         return repr_str
 
     def __repr__(self):
         return self._string
+    
+    def _is_last(self) -> bool:
+        return self._is_last
 
 class TernarySearchTree:
+    """A ternary search tree is a special trie data structure where the child nodes of a standard tree are ordered as a binary search tree."""
+
+
     def __init__(self):
         self._root = None
- 
+
     def insert(self, string):
         if self._root is None:
             self._root = TTreeNode(string)
@@ -67,7 +97,7 @@ class TernarySearchTree:
             return False
         else:
             return self._root._search(string)
- 
+
     def all_strings(self):
         if self._root is None:
             return []
